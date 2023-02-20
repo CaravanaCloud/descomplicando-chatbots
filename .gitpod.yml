@@ -1,0 +1,37 @@
+# https://gitpod.io/#github.com/CaravanaCloud/piggybank
+
+image:
+  file: .gitpod.Dockerfile
+
+tasks:
+  - name: Soundcheck
+    command: aws --version
+
+ports:
+  - port: 3000
+    onOpen: ignore
+  - port: 3306
+    onOpen: ignore    
+  - port: 5000
+    onOpen: ignore
+  - port: 5005
+    onOpen: ignore   
+  - port: 7028
+    onOpen: ignore    
+  - port: 8080
+    onOpen: ignore
+  - port: 8888
+    onOpen: ignore
+
+
+vscode:
+  extensions:
+    - vscjava.vscode-java-pack
+    - vscjava.vscode-java-debug
+    - vscjava.vscode-java-dependency
+    - vscjava.vscode-java-test
+    - vscjava.vscode-maven
+    - redhat.java
+    - redhat.fabric8-analytics
+    - ms-azuretools.vscode-docker
+    - aws-scripting-guy.cform
