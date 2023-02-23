@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: software.amazon.awscdk:cdk-asset-node-proxy-agent-v5:2.0.65">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/software/amazon/awscdk/cdk-asset-node-proxy-agent-v5/2.0.65/cdk-asset-node-proxy-agent-v5-2.0.65.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/software/amazon/awscdk/cdk-asset-node-proxy-agent-v5/2.0.65/cdk-asset-node-proxy-agent-v5-2.0.65-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/software/amazon/awscdk/cdk-asset-node-proxy-agent-v5/2.0.65/cdk-asset-node-proxy-agent-v5-2.0.65-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
