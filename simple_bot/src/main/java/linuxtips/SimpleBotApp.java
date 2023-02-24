@@ -1,10 +1,7 @@
-package com.myorg;
+package linuxtips;
 
 import software.amazon.awscdk.App;
-import software.amazon.awscdk.Environment;
 import software.amazon.awscdk.StackProps;
-
-import java.util.Arrays;
 
 public class SimpleBotApp {
     public static void main(final String[] args) {

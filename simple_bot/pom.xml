@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>linuxtips</groupId>
-    <artifactId>simple_bot_fn</artifactId>
+    <artifactId>simple_bot</artifactId>
     <version>0.1</version>
 
     <properties>
@@ -28,7 +28,7 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.0.0</version>
                 <configuration>
-                    <mainClass>com.myorg.SimpleBotApp</mainClass>
+                    <mainClass>linuxtips.SimpleBotApp</mainClass>
                 </configuration>
             </plugin>
         </plugins>
