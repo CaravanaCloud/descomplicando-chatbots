@@ -1,9 +1,13 @@
 package linuxtips;
 
 import org.jetbrains.annotations.NotNull;
+import software.amazon.awscdk.CfnOutput;
 import software.amazon.awscdk.services.iam.ManagedPolicy;
 import software.amazon.awscdk.services.iam.Role;
 import software.amazon.awscdk.services.iam.ServicePrincipal;
+import software.amazon.awscdk.services.lex.CfnBotAlias;
+import software.amazon.awscdk.services.lex.CfnBotAliasProps;
+import software.amazon.awscdk.services.lex.CfnBotVersion;
 import software.constructs.Construct;
 import software.amazon.awscdk.Stack;
 import software.amazon.awscdk.StackProps;
@@ -37,6 +41,57 @@ public class SimpleBotStack extends Stack {
                 .roleArn(roleArn)
                 .botLocales(locales)
                 .autoBuildBotLocales(true)
+                .build();
+        //--
+        var botArn = bot.getAttrArn();
+        var botId = bot.getAttrId();
+        var botIdOut = CfnOutput.Builder.create(this, "simple-bot-id")
+                .value(botId)
+                .build();
+        var botArnOut = CfnOutput.Builder.create(this, "simple-bot-arn")
+                .value(botArn)
+                .build();
+        //
+        var botAliasName = "simple-bot-alias";
+        //
+        /*
+        var botVersion = CfnBotVersion.Builder.create(this, "simple-bot-version")
+                .botId(botId)
+                .build();
+        var botVersionStr = botVersion.getAttrBotVersion();
+        */
+        //
+        var lambdaArn = "arn:aws:lambda:us-west-2:192912639870:function:simple-bot-fn-SimpleBotFn-ZS06C7Vi24ef";
+        var lambdaHook = CfnBot.LambdaCodeHookProperty.builder()
+                .lambdaArn(lambdaArn)
+                .codeHookInterfaceVersion("1.0")
+                .build();
+        var hook = CfnBot.CodeHookSpecificationProperty.builder()
+                .lambdaCodeHook(lambdaHook)
+                .build();
+        //
+        var aliasLocaleSetting = CfnBot.BotAliasLocaleSettingsProperty.builder()
+                .enabled(true)
+                .codeHookSpecification(hook)
+                .build();
+        var aliasLocaleSettingItem = CfnBot.BotAliasLocaleSettingsItemProperty
+                        .builder()
+                        .botAliasLocaleSetting(aliasLocaleSetting)
+                        .localeId("pt_BR")
+                        .build();
+        var aliasLocaleSettings = List.of(aliasLocaleSetting);
+        //
+        var aliasProp = CfnBotAliasProps.builder()
+                .botAliasLocaleSettings(aliasLocaleSettings)
+                .botAliasName(botAliasName)
+                .botId(botId)
+                .build();
+        var aliasProps = List.of(aliasProp);
+        //
+        var botAlias = CfnBotAlias.Builder.create(this, "simple-bot-alias")
+                .botAliasName(botAliasName)
+                .botId(botId)
+                //.botVersion(botVersionStr)
                 .build();
 
     }
