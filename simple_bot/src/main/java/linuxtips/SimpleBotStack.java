@@ -54,12 +54,23 @@ public class SimpleBotStack extends Stack {
         //
         var botAliasName = "simple-bot-alias";
         //
-        /*
+        var botVersionLocaleDetailsBR = CfnBotVersion.BotVersionLocaleDetailsProperty.builder()
+                .sourceBotVersion("1")
+                .build();
+
+        var versionLocaleSpecBR = CfnBotVersion.BotVersionLocaleSpecificationProperty.builder()
+                .localeId("pt_BR")
+                .botVersionLocaleDetails(botVersionLocaleDetailsBR)
+                .build();
+
+        var versionLocaleSpecs = List.of(versionLocaleSpecBR);
         var botVersion = CfnBotVersion.Builder.create(this, "simple-bot-version")
                 .botId(botId)
+                .botVersionLocaleSpecification(versionLocaleSpecs)
                 .build();
+
         var botVersionStr = botVersion.getAttrBotVersion();
-        */
+
         //
         var lambdaArn = "arn:aws:lambda:us-west-2:192912639870:function:simple-bot-fn-SimpleBotFn-ZS06C7Vi24ef";
         var lambdaHook = CfnBot.LambdaCodeHookProperty.builder()
