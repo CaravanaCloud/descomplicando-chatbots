@@ -79,37 +79,47 @@ public class SimpleBotStack extends Stack {
         var lambdaName = Fn.importValue(String.format("%s-SimpleBotFnName",lambdaStackName));
 
         //
-        //
+        /* 
         var lambdaHook = CfnBot.LambdaCodeHookProperty.builder()
                 .lambdaArn(lambdaArn)
                 .codeHookInterfaceVersion("1.0")
                 .build();
+        
         var hook = CfnBot.CodeHookSpecificationProperty.builder()
                 .lambdaCodeHook(lambdaHook)
                 .build();
-        //
-        var aliasLocaleSetting = CfnBot.BotAliasLocaleSettingsProperty.builder()
-                .enabled(true)
-                .codeHookSpecification(hook)
+
+        */
+        var aliasLambda = CfnBotAlias.LambdaCodeHookProperty.builder()
+                .lambdaArn(lambdaArn)
+                .codeHookInterfaceVersion("1.0")
                 .build();
-        var aliasLocaleSettingItem = CfnBot.BotAliasLocaleSettingsItemProperty
+        var aliasHook = CfnBotAlias.CodeHookSpecificationProperty.builder()
+                .lambdaCodeHook(aliasLambda)
+                .build();
+        var aliasLocaleSetting = CfnBotAlias.BotAliasLocaleSettingsProperty.builder()
+                .codeHookSpecification(aliasHook)
+                .enabled(true)
+                .build();
+        var aliasLocaleSettingItem = CfnBotAlias.BotAliasLocaleSettingsItemProperty
                         .builder()
-                        .botAliasLocaleSetting(aliasLocaleSetting)
                         .localeId("pt_BR")
+                        .botAliasLocaleSetting(aliasLocaleSetting)
                         .build();
-        var aliasLocaleSettings = List.of(aliasLocaleSetting);
-        //
+        var aliasLocaleSettings = List.of(aliasLocaleSettingItem);
+        /*
         var aliasProp = CfnBotAliasProps.builder()
                 .botAliasLocaleSettings(aliasLocaleSettings)
                 .botAliasName(botAliasName)
                 .botId(botId)
                 .build();
         var aliasProps = List.of(aliasProp);
-        //
+         */
         var botAlias = CfnBotAlias.Builder.create(this, "simple-bot-alias")
                 .botAliasName(botAliasName)
                 .botId(botId)
                 .botVersion(botVersionStr)
+                .botAliasLocaleSettings(aliasLocaleSettings)
                 .build();
         //
         var botAliasArn = botAlias.getAttrArn();
@@ -128,7 +138,7 @@ public class SimpleBotStack extends Stack {
         var testBotAliasArn = String.format("arn:aws:lex:%s:%s:bot-alias/%s/%s	", 
          region, accountId, botId, "TSALIASID");
         var testBotAliasArnOut = CfnOutput.Builder.create(this, "simple-bot-test-alias-arn")
-         .value(botAliasArn)
+         .value(testBotAliasArn)
          .build();
         
 
