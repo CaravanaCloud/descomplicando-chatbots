@@ -2,9 +2,13 @@ package linuxtips;
 
 import org.jetbrains.annotations.NotNull;
 import software.amazon.awscdk.CfnOutput;
+import software.amazon.awscdk.Fn;
 import software.amazon.awscdk.services.iam.ManagedPolicy;
 import software.amazon.awscdk.services.iam.Role;
 import software.amazon.awscdk.services.iam.ServicePrincipal;
+import software.amazon.awscdk.services.lambda.CfnFunction;
+import software.amazon.awscdk.services.lambda.CfnPermission;
+import software.amazon.awscdk.services.lambda.Permission;
 import software.amazon.awscdk.services.lex.CfnBotAlias;
 import software.amazon.awscdk.services.lex.CfnBotAliasProps;
 import software.amazon.awscdk.services.lex.CfnBotVersion;
@@ -72,7 +76,12 @@ public class SimpleBotStack extends Stack {
         var botVersionStr = botVersion.getAttrBotVersion();
 
         //
-        var lambdaArn = "arn:aws:lambda:us-west-2:192912639870:function:simple-bot-fn-SimpleBotFn-ZS06C7Vi24ef";
+        var lambdaStackName = "simple-bot-fn";
+        var lambdaArn = Fn.importValue(String.format("%s-SimpleBotFnArn",lambdaStackName));
+        var lambdaName = Fn.importValue(String.format("%s-SimpleBotFnName",lambdaStackName));
+
+        //
+        //
         var lambdaHook = CfnBot.LambdaCodeHookProperty.builder()
                 .lambdaArn(lambdaArn)
                 .codeHookInterfaceVersion("1.0")
@@ -102,7 +111,14 @@ public class SimpleBotStack extends Stack {
         var botAlias = CfnBotAlias.Builder.create(this, "simple-bot-alias")
                 .botAliasName(botAliasName)
                 .botId(botId)
-                //.botVersion(botVersionStr)
+                .botVersion(botVersionStr)
+                .build();
+        //
+        var lambdaPerm = CfnPermission.Builder.create(this, "simple-bot-perm")
+                .functionName(lambdaName)
+                .action("lambda:InvokeFunction")
+                .principal("lexv2.amazonaws.com")
+                .sourceArn(botAlias.getAttrArn())
                 .build();
 
     }

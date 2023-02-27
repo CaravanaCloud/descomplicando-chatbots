@@ -1,6 +1,5 @@
 package linuxtips;
 
-import javax.inject.Inject;
 import javax.inject.Named;
 
 import com.amazonaws.services.lambda.runtime.Context;
@@ -10,14 +9,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Named("test")
-public class TestLambda implements RequestHandler<Map<String, Object>, Map<String, Object>> {
-
+@Named("simple-bot-lambda")
+public class SimpleBotCodeHookLambda implements RequestHandler<Map<String, Object>, Map<String, Object>> {
 
     @Override
     public Map<String, Object> handleRequest(Map<String, Object> input, Context context) {
         var log = context.getLogger();
-        log.log("------");
+        log.log("-------");
         input.forEach( (k,v) -> log.log(k + " : " + v) );
         var result = new HashMap<String, Object>();
         var sessionState = Map.of(
