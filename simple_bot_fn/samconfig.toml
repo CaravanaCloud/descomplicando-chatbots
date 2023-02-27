@@ -3,8 +3,9 @@ version = 0.1
 [default.deploy]
 [default.deploy.parameters]
 stack_name = "simple-bot-fn"
-s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-gweshfbdn1zj"
+s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-db0coth16zu6"
 s3_prefix = "simple-bot-fn"
 region = "us-west-2"
 capabilities = "CAPABILITY_IAM"
 image_repositories = []
+parameter_overrides = "SimpleBotFnName=\"simple-bot-codehook\""
