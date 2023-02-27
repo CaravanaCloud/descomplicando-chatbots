@@ -26,3 +26,4 @@ hs_err_pid*
 *.iml
 cdk.out
 target
+simple_bot_fn/samconfig.toml
