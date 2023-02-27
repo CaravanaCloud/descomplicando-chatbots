@@ -1,14 +1,11 @@
 package linuxtips;
 
-import org.jetbrains.annotations.NotNull;
 import software.amazon.awscdk.CfnOutput;
 import software.amazon.awscdk.Fn;
 import software.amazon.awscdk.services.iam.ManagedPolicy;
 import software.amazon.awscdk.services.iam.Role;
 import software.amazon.awscdk.services.iam.ServicePrincipal;
-import software.amazon.awscdk.services.lambda.CfnFunction;
 import software.amazon.awscdk.services.lambda.CfnPermission;
-import software.amazon.awscdk.services.lambda.Permission;
 import software.amazon.awscdk.services.lex.CfnBotAlias;
 import software.amazon.awscdk.services.lex.CfnBotAliasProps;
 import software.amazon.awscdk.services.lex.CfnBotVersion;
@@ -58,8 +55,9 @@ public class SimpleBotStack extends Stack {
         //
         var botAliasName = "simple-bot-alias";
         //
+        
         var botVersionLocaleDetailsBR = CfnBotVersion.BotVersionLocaleDetailsProperty.builder()
-                .sourceBotVersion("1")
+                .sourceBotVersion("DRAFT")
                 .build();
 
         var versionLocaleSpecBR = CfnBotVersion.BotVersionLocaleSpecificationProperty.builder()
@@ -74,7 +72,7 @@ public class SimpleBotStack extends Stack {
                 .build();
 
         var botVersionStr = botVersion.getAttrBotVersion();
-
+        
         //
         var lambdaStackName = "simple-bot-fn";
         var lambdaArn = Fn.importValue(String.format("%s-SimpleBotFnArn",lambdaStackName));
@@ -114,12 +112,25 @@ public class SimpleBotStack extends Stack {
                 .botVersion(botVersionStr)
                 .build();
         //
-        var lambdaPerm = CfnPermission.Builder.create(this, "simple-bot-perm")
+        var botAliasArn = botAlias.getAttrArn();
+        var lambdaPerm = CfnPermission.Builder.create(this, "simple-bot-perm-alias")
                 .functionName(lambdaName)
                 .action("lambda:InvokeFunction")
                 .principal("lexv2.amazonaws.com")
-                .sourceArn(botAlias.getAttrArn())
+                .sourceArn(botAliasArn)
                 .build();
+        System.out.println(botAliasArn);
+        var botAliasArnOut = CfnOutput.Builder.create(this, "simple-bot-alias-arn")
+                .value(botAliasArn)
+                .build();
+        var accountId = Fn.ref("AWS::AccountId");
+        var region = Fn.ref("AWS::Region");
+        var testBotAliasArn = String.format("arn:aws:lex:%s:%s:bot-alias/%s/%s	", 
+         region, accountId, botId, "TSALIASID");
+        var testBotAliasArnOut = CfnOutput.Builder.create(this, "simple-bot-test-alias-arn")
+         .value(botAliasArn)
+         .build();
+        
 
     }
 
@@ -140,10 +151,12 @@ public class SimpleBotStack extends Stack {
     private CfnBot.BotLocaleProperty createLocaleBR() {
         var fallback = createIntent("FallbackIntent",
                 "Fallback if not understood",
-                "AMAZON.FallbackIntent");
+                "AMAZON.FallbackIntent",
+                false);
         var hello = createIntent("HelloIntent",
                 "Say hello to the bot",
                 null,
+                true,
                 "Oi", "Salve", "Ola", "Bao");
         var intents = List.of(hello, fallback);
         var locale = CfnBot.BotLocaleProperty.builder()
@@ -157,14 +170,20 @@ public class SimpleBotStack extends Stack {
     private CfnBot.IntentProperty createIntent(String name,
                                                String description,
                                                String parentIntentSignature,
+                                               boolean codeHookEnabled,
                                                String... utts) {
         var uttsList = Arrays
                 .stream(utts)
                 .map(this::createUtterance)
                 .collect(Collectors.toList());
+        var codeHook = CfnBot.FulfillmentCodeHookSettingProperty
+                .builder()
+                .enabled(codeHookEnabled)
+                .build();
         var intent = CfnBot.IntentProperty.builder()
                 .name(name)
                 .description(description)
+                .fulfillmentCodeHook(codeHook)
                 .parentIntentSignature(parentIntentSignature);
         if (! uttsList.isEmpty()){
             intent = intent.sampleUtterances(uttsList);
