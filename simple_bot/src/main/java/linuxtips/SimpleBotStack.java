@@ -1,14 +1,8 @@
 package linuxtips;
 
-import software.amazon.awscdk.CfnOutput;
-import software.amazon.awscdk.Fn;
 import software.amazon.awscdk.services.iam.ManagedPolicy;
 import software.amazon.awscdk.services.iam.Role;
 import software.amazon.awscdk.services.iam.ServicePrincipal;
-import software.amazon.awscdk.services.lambda.CfnPermission;
-import software.amazon.awscdk.services.lex.CfnBotAlias;
-import software.amazon.awscdk.services.lex.CfnBotAliasProps;
-import software.amazon.awscdk.services.lex.CfnBotVersion;
 import software.constructs.Construct;
 import software.amazon.awscdk.Stack;
 import software.amazon.awscdk.StackProps;
@@ -43,104 +37,7 @@ public class SimpleBotStack extends Stack {
                 .botLocales(locales)
                 .autoBuildBotLocales(true)
                 .build();
-        //--
-        var botArn = bot.getAttrArn();
-        var botId = bot.getAttrId();
-        var botIdOut = CfnOutput.Builder.create(this, "simple-bot-id")
-                .value(botId)
-                .build();
-        var botArnOut = CfnOutput.Builder.create(this, "simple-bot-arn")
-                .value(botArn)
-                .build();
-        //
-        var botAliasName = "simple-bot-alias";
-        //
-        
-        var botVersionLocaleDetailsBR = CfnBotVersion.BotVersionLocaleDetailsProperty.builder()
-                .sourceBotVersion("DRAFT")
-                .build();
 
-        var versionLocaleSpecBR = CfnBotVersion.BotVersionLocaleSpecificationProperty.builder()
-                .localeId("pt_BR")
-                .botVersionLocaleDetails(botVersionLocaleDetailsBR)
-                .build();
-
-        var versionLocaleSpecs = List.of(versionLocaleSpecBR);
-        var botVersion = CfnBotVersion.Builder.create(this, "simple-bot-version")
-                .botId(botId)
-                .botVersionLocaleSpecification(versionLocaleSpecs)
-                .build();
-
-        var botVersionStr = botVersion.getAttrBotVersion();
-        
-        //
-        var lambdaStackName = "simple-bot-fn";
-        var lambdaArn = Fn.importValue(String.format("%s-SimpleBotFnArn",lambdaStackName));
-        var lambdaName = Fn.importValue(String.format("%s-SimpleBotFnName",lambdaStackName));
-
-        //
-        /* 
-        var lambdaHook = CfnBot.LambdaCodeHookProperty.builder()
-                .lambdaArn(lambdaArn)
-                .codeHookInterfaceVersion("1.0")
-                .build();
-        
-        var hook = CfnBot.CodeHookSpecificationProperty.builder()
-                .lambdaCodeHook(lambdaHook)
-                .build();
-
-        */
-        var aliasLambda = CfnBotAlias.LambdaCodeHookProperty.builder()
-                .lambdaArn(lambdaArn)
-                .codeHookInterfaceVersion("1.0")
-                .build();
-        var aliasHook = CfnBotAlias.CodeHookSpecificationProperty.builder()
-                .lambdaCodeHook(aliasLambda)
-                .build();
-        var aliasLocaleSetting = CfnBotAlias.BotAliasLocaleSettingsProperty.builder()
-                .codeHookSpecification(aliasHook)
-                .enabled(true)
-                .build();
-        var aliasLocaleSettingItem = CfnBotAlias.BotAliasLocaleSettingsItemProperty
-                        .builder()
-                        .localeId("pt_BR")
-                        .botAliasLocaleSetting(aliasLocaleSetting)
-                        .build();
-        var aliasLocaleSettings = List.of(aliasLocaleSettingItem);
-        /*
-        var aliasProp = CfnBotAliasProps.builder()
-                .botAliasLocaleSettings(aliasLocaleSettings)
-                .botAliasName(botAliasName)
-                .botId(botId)
-                .build();
-        var aliasProps = List.of(aliasProp);
-         */
-        var botAlias = CfnBotAlias.Builder.create(this, "simple-bot-alias")
-                .botAliasName(botAliasName)
-                .botId(botId)
-                .botVersion(botVersionStr)
-                .botAliasLocaleSettings(aliasLocaleSettings)
-                .build();
-        //
-        var botAliasArn = botAlias.getAttrArn();
-        var lambdaPerm = CfnPermission.Builder.create(this, "simple-bot-perm-alias")
-                .functionName(lambdaName)
-                .action("lambda:InvokeFunction")
-                .principal("lexv2.amazonaws.com")
-                .sourceArn(botAliasArn)
-                .build();
-        System.out.println(botAliasArn);
-        var botAliasArnOut = CfnOutput.Builder.create(this, "simple-bot-alias-arn")
-                .value(botAliasArn)
-                .build();
-        var accountId = Fn.ref("AWS::AccountId");
-        var region = Fn.ref("AWS::Region");
-        var testBotAliasArn = String.format("arn:aws:lex:%s:%s:bot-alias/%s/%s	", 
-         region, accountId, botId, "TSALIASID");
-        var testBotAliasArnOut = CfnOutput.Builder.create(this, "simple-bot-test-alias-arn")
-         .value(testBotAliasArn)
-         .build();
-        
 
     }
 
