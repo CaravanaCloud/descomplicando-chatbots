@@ -1,0 +1,26 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: AWS Serverless Quarkus - quarkus-amazon-lambda-common-deployment
+Globals:
+  Api:
+    EndpointConfiguration: REGIONAL
+    BinaryMediaTypes:
+      - "*/*"
+
+Resources:
+  SimpleBotFn:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: io.quarkus.amazon.lambda.runtime.QuarkusStreamHandler::handleRequest
+      Runtime: java11
+      CodeUri: target/function.zip
+      MemorySize: 512
+      Timeout: 30
+      Policies: AWSLambdaBasicExecutionRole
+
+Outputs:
+    SimpleBotFnArn:
+      Description: ARN of the lambda code hook
+      Value: !GetAtt "SimpleBotFn.Arn"
+      Export:
+        Name: !Sub "${AWS::StackName}-SimpleBotFnArn"
