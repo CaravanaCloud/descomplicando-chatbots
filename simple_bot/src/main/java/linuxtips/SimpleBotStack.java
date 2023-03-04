@@ -80,7 +80,7 @@ public class SimpleBotStack extends Stack {
                                                boolean codeHookEnabled,
                                                String... utts) {
         var uttsList = Arrays
-                .stream(utts)
+                .stream(utts) 
                 .map(this::createUtterance)
                 .collect(Collectors.toList());
         var codeHook = CfnBot.FulfillmentCodeHookSettingProperty
