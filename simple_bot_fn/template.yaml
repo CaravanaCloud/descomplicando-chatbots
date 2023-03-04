@@ -24,3 +24,9 @@ Outputs:
       Value: !GetAtt "SimpleBotFn.Arn"
       Export:
         Name: !Sub "${AWS::StackName}-SimpleBotFnArn"
+
+    SimpleBotFnId:
+      Description: Id of the lambda code hook
+      Value: !Ref "SimpleBotFn"
+      Export:
+        Name: !Sub "${AWS::StackName}-SimpleBotFnId"
