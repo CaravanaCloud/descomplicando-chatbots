@@ -58,12 +58,10 @@ public class SimpleBotStack extends Stack {
     private CfnBot.BotLocaleProperty createLocaleBR() {
         var fallback = createIntent("FallbackIntent",
                 "Fallback if not understood",
-                "AMAZON.FallbackIntent",
-                false);
+                "AMAZON.FallbackIntent");
         var hello = createIntent("HelloIntent",
                 "Say hello to the bot",
                 null,
-                true,
                 "Oi", "Salve", "Ola", "Bao");
         var intents = List.of(hello, fallback);
         var locale = CfnBot.BotLocaleProperty.builder()
@@ -77,20 +75,14 @@ public class SimpleBotStack extends Stack {
     private CfnBot.IntentProperty createIntent(String name,
                                                String description,
                                                String parentIntentSignature,
-                                               boolean codeHookEnabled,
                                                String... utts) {
         var uttsList = Arrays
                 .stream(utts) 
                 .map(this::createUtterance)
                 .collect(Collectors.toList());
-        var codeHook = CfnBot.FulfillmentCodeHookSettingProperty
-                .builder()
-                .enabled(codeHookEnabled)
-                .build();
         var intent = CfnBot.IntentProperty.builder()
                 .name(name)
                 .description(description)
-                .fulfillmentCodeHook(codeHook)
                 .parentIntentSignature(parentIntentSignature);
         if (! uttsList.isEmpty()){
             intent = intent.sampleUtterances(uttsList);
