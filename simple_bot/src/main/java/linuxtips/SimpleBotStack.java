@@ -1,6 +1,5 @@
 package linuxtips;
 
-import org.jetbrains.annotations.NotNull;
 import software.amazon.awscdk.CfnOutput;
 import software.amazon.awscdk.Fn;
 import software.amazon.awscdk.services.iam.ManagedPolicy;
