@@ -1,5 +1,6 @@
 package linuxtips;
 
+import linuxtips.bot.Bot;
 import software.amazon.awscdk.CfnOutput;
 import software.amazon.awscdk.Fn;
 import software.amazon.awscdk.services.iam.ManagedPolicy;
@@ -23,17 +24,18 @@ public class SimpleBotStack extends Stack {
         this(scope, id, null);
     }
 
-    public SimpleBotStack(final Construct scope, final String id, final StackProps props) {
-        super(scope, id, props);
 
+    private void create(Bot bot) {
         var privacy = CfnBot.DataPrivacyProperty.builder()
-                .childDirected(false)
+                .childDirected(bot.childDirected())
                 .build();
-        var idleTimeout = 60 * 30L;
-        var botName = "simple-bot";
+        var idleTimeout = bot.idleTimeout();
+        var botName = bot.name();
+        var locales = bot.locales().stream()
+                .map(this::toCfnLocale)
+                .toList();
+
         var roleArn = createRole();
-        var br = createLocaleBR();
-        var locales = List.of(br);
         var bot = CfnBot.Builder.create(this, "simple-bot")
                 .dataPrivacy(privacy)
                 .idleSessionTtlInSeconds(idleTimeout)
@@ -42,6 +44,14 @@ public class SimpleBotStack extends Stack {
                 .botLocales(locales)
                 .autoBuildBotLocales(true)
                 .build();
+
+    }
+
+    public SimpleBotStack(final Construct scope, final String id, final StackProps props) {
+        super(scope, id, props);
+        var bot = SimpleBot.of(); //bot definition
+        create(bot); // bot deploy
+
 
         var botId = bot.getAttrId();
         var botIdOut = CfnOutput.Builder.create(this, "simple-bot-id")
@@ -123,6 +133,7 @@ public class SimpleBotStack extends Stack {
                 .build();
 
     }
+
 
     private String createRole() {
         var botPrincipal = ServicePrincipal.Builder.create("lexv2.amazonaws.com").build();
