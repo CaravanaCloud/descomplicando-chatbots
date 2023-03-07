@@ -6,7 +6,7 @@ RUN bash -c "sudo install-packages gettext tmux htop"
 # Brew packages
 # DEBUG RUN bash -c "brew install gh fio golang cowsay lolcat terraform"
 # Java, Maven and Quarkus
-ARG JAVA_VERSION="11.0.18-amzn"
+ARG JAVA_VERSION="17.0.6-amzn"
 RUN bash -c ". /home/gitpod/.sdkman/bin/sdkman-init.sh && sdk install java ${JAVA_VERSION} && sdk default java ${JAVA_VERSION} && sdk install maven &&  sdk install quarkus"
 # AWS CLI
 RUN bash -c "curl 'https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip' -o 'awscliv2.zip' && unzip awscliv2.zip && sudo ./aws/install"
