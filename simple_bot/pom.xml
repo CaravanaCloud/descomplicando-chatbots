@@ -12,7 +12,7 @@
         <cdk.version>2.56.0</cdk.version>
         <constructs.version>[10.0.0,11.0.0)</constructs.version>
         <junit.version>5.7.1</junit.version>
-        <maven.compiler.release>11</maven.compiler.release>
+        <maven.compiler.release>17</maven.compiler.release>
     </properties>
 
     <build>
@@ -28,7 +28,7 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.0.0</version>
                 <configuration>
-                    <mainClass>linuxtips.SimpleBotApp</mainClass>
+                    <mainClass>linuxtips.cdk.SimpleBotApp</mainClass>
                 </configuration>
             </plugin>
         </plugins>

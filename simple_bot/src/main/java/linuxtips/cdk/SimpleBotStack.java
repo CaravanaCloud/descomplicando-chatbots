@@ -1,6 +1,9 @@
-package linuxtips;
+package linuxtips.cdk;
 
-import org.jetbrains.annotations.NotNull;
+import linuxtips.bot.Bot;
+import linuxtips.bot.BotIntent;
+import linuxtips.bot.BotLocale;
+import linuxtips.delivery.DeliveryBot;
 import software.amazon.awscdk.CfnOutput;
 import software.amazon.awscdk.Fn;
 import software.amazon.awscdk.services.iam.ManagedPolicy;
@@ -16,6 +19,7 @@ import software.amazon.awscdk.services.lex.CfnBot;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class SimpleBotStack extends Stack {
@@ -27,22 +31,10 @@ public class SimpleBotStack extends Stack {
     public SimpleBotStack(final Construct scope, final String id, final StackProps props) {
         super(scope, id, props);
 
-        var privacy = CfnBot.DataPrivacyProperty.builder()
-                .childDirected(false)
-                .build();
-        var idleTimeout = 60 * 30L;
-        var botName = "simple-bot";
-        var roleArn = createRole();
-        var br = createLocaleBR();
-        var locales = List.of(br);
-        var bot = CfnBot.Builder.create(this, "simple-bot")
-                .dataPrivacy(privacy)
-                .idleSessionTtlInSeconds(idleTimeout)
-                .name(botName)
-                .roleArn(roleArn)
-                .botLocales(locales)
-                .autoBuildBotLocales(true)
-                .build();
+
+        var deliveryBot = DeliveryBot.of();
+        var bot = toCfnBot(deliveryBot);
+
 
         var botId = bot.getAttrId();
         var botIdOut = CfnOutput.Builder.create(this, "simple-bot-id")
@@ -125,6 +117,64 @@ public class SimpleBotStack extends Stack {
 
     }
 
+    private CfnBot toCfnBot(Bot deliveryBot) {
+        var roleArn = createRole();
+        var privacy = CfnBot.DataPrivacyProperty.builder()
+                .childDirected(deliveryBot.childDirected())
+                .build();
+        var locales = deliveryBot.locales()
+                .values()
+                .stream()
+                .map(this::toCfnLocale)
+                .toList();
+
+        var bot = CfnBot.Builder.create(this, "simple-bot")
+                .dataPrivacy(privacy)
+                .idleSessionTtlInSeconds(deliveryBot.sessionTtl())
+                .name(deliveryBot.name())
+                .roleArn(roleArn)
+                .botLocales(locales)
+                .autoBuildBotLocales(true)
+                .build();
+        return bot;
+    }
+
+    private CfnBot.BotLocaleProperty toCfnLocale(BotLocale botLocale) {
+
+        var intents = botLocale.intents()
+                .values()
+                .stream()
+                .map(this::toCfnIntent)
+                .toList();
+
+        var locale = CfnBot.BotLocaleProperty.builder()
+                .localeId(botLocale.id())
+                .nluConfidenceThreshold(botLocale.nluThreshold())
+                .intents(intents)
+                .build();
+        return locale;
+    }
+
+    private CfnBot.IntentProperty toCfnIntent(BotIntent botIntent) {
+        var uttsList = botIntent.utterances()
+                .stream()
+                .map(this::createUtterance)
+                .collect(Collectors.toList());
+        var codeHook = CfnBot.FulfillmentCodeHookSettingProperty
+                .builder()
+                .enabled(botIntent.codeHook())
+                .build();
+        var intent = CfnBot.IntentProperty.builder()
+                .name(botIntent.name())
+                .description(botIntent.description())
+                .fulfillmentCodeHook(codeHook)
+                .parentIntentSignature(botIntent.parentSignature());
+        if (! uttsList.isEmpty()){
+            intent = intent.sampleUtterances(uttsList);
+        }
+        return intent.build();
+    }
+
     private String createRole() {
         var botPrincipal = ServicePrincipal.Builder.create("lexv2.amazonaws.com").build();
         var botPolicyArn = "arn:aws:iam::aws:policy/AmazonLexRunBotsOnly";
@@ -137,49 +187,6 @@ public class SimpleBotStack extends Stack {
                 .build();
         var roleArn = role.getRoleArn();
         return roleArn;
-    }
-
-    private CfnBot.BotLocaleProperty createLocaleBR() {
-        var fallback = createIntent("FallbackIntent",
-                "Fallback if not understood",
-                "AMAZON.FallbackIntent",
-                false);
-        var hello = createIntent("HelloIntent",
-                "Say hello to the bot",
-                null,
-                true,
-                "Oi", "Salve", "Ola", "Bao");
-        var intents = List.of(hello, fallback);
-        var locale = CfnBot.BotLocaleProperty.builder()
-                .localeId("pt_BR")
-                .nluConfidenceThreshold(0.5)
-                .intents(intents)
-                .build();
-        return locale;
-    }
-
-    private CfnBot.IntentProperty createIntent(String name,
-                                               String description,
-                                               String parentIntentSignature,
-                                               boolean codeHookEnabled,
-                                               String... utts) {
-        var uttsList = Arrays
-                .stream(utts) 
-                .map(this::createUtterance)
-                .collect(Collectors.toList());
-        var codeHook = CfnBot.FulfillmentCodeHookSettingProperty
-                .builder()
-                .enabled(codeHookEnabled)
-                .build();
-        var intent = CfnBot.IntentProperty.builder()
-                .name(name)
-                .description(description)
-                .fulfillmentCodeHook(codeHook)
-                .parentIntentSignature(parentIntentSignature);
-        if (! uttsList.isEmpty()){
-            intent = intent.sampleUtterances(uttsList);
-        }
-        return intent.build();
     }
 
     private CfnBot.SampleUtteranceProperty createUtterance(String utt) {
